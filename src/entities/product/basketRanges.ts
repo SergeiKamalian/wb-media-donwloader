@@ -39,7 +39,10 @@ function parseBasketRange(value: unknown): BasketRange {
   }
 }
 
-export function parseMediabasketRanges(payload: unknown): BasketRange[] {
+function parseOriginRouteMap(
+  payload: unknown,
+  field: 'mediabasket_route_map' | 'videonme_route_map',
+): BasketRange[] {
   if (!isRecord(payload)) {
     throw new Error('Ответ upstreams не объект')
   }
@@ -49,16 +52,16 @@ export function parseMediabasketRanges(payload: unknown): BasketRange[] {
     throw new Error('Поле origin отсутствует или не объект')
   }
 
-  const routeMap = origin.mediabasket_route_map
+  const routeMap = origin[field]
   if (!Array.isArray(routeMap) || routeMap.length === 0) {
-    throw new Error('Поле origin.mediabasket_route_map отсутствует или пустое')
+    throw new Error(`Поле origin.${field} отсутствует или пустое`)
   }
 
   const ranges: BasketRange[] = []
 
   for (const entry of routeMap) {
     if (!isRecord(entry)) {
-      throw new Error('Элемент mediabasket_route_map не объект')
+      throw new Error(`Элемент ${field} не объект`)
     }
 
     const hosts = entry.hosts
@@ -72,20 +75,29 @@ export function parseMediabasketRanges(payload: unknown): BasketRange[] {
   }
 
   if (ranges.length === 0) {
-    throw new Error('Карта mediabasket не содержит диапазонов')
+    throw new Error(`Карта ${field} не содержит диапазонов`)
   }
 
   return ranges
 }
 
-export function findBasketHost(vol: number, ranges: readonly BasketRange[]): string {
+export function parseMediabasketRanges(payload: unknown): BasketRange[] {
+  return parseOriginRouteMap(payload, 'mediabasket_route_map')
+}
+
+export function parseVideonmeRanges(payload: unknown): BasketRange[] {
+  return parseOriginRouteMap(payload, 'videonme_route_map')
+}
+
+export function findBasketHost(
+  vol: number,
+  ranges: readonly BasketRange[],
+): string {
   for (const range of ranges) {
     if (vol >= range.volRangeFrom && vol <= range.volRangeTo) {
       return range.host
     }
   }
 
-  throw new Error(
-    `Артикул не попал ни в один диапазон корзин: vol=${vol}`,
-  )
+  throw new Error(`Артикул не попал ни в один диапазон корзин: vol=${vol}`)
 }

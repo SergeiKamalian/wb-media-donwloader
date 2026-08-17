@@ -190,7 +190,7 @@
 
 Коммит: `feat(download): add video download` или `docs: describe video limitation`
 
-Заметка:
+Заметка: Видео карточки — HLS, не один mp4. Формула gist подтверждена на трёх артикулах: `https://{videonme-host}/vol{nm%144}/part{floor(nm/1e4)}/{nm}/hls/1440p/index.m3u8` отдаёт `application/vnd.apple.mpegurl` и сегменты `1.ts`…; прямого mp4 нет (404). Склейку не делали. Кнопка видна только после HEAD 200 на index.m3u8 и объясняет ограничение со ссылкой на плейлист. Для README / прод: собирать и перекодировать на сервере, клиенту отдавать готовую ссылку на файл.
 
 ---
 

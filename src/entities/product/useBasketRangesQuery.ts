@@ -11,10 +11,15 @@ export enum BasketRangesQueryState {
 
 export type BasketRangesQueryView =
   | { state: BasketRangesQueryState.Loading }
-  | { state: BasketRangesQueryState.Ready; ranges: readonly BasketRange[] }
+  | {
+      state: BasketRangesQueryState.Ready
+      media: readonly BasketRange[]
+      video: readonly BasketRange[]
+    }
   | {
       state: BasketRangesQueryState.Fallback
-      ranges: readonly BasketRange[]
+      media: readonly BasketRange[]
+      video: readonly BasketRange[]
       error: Error
       retry: () => void
     }
@@ -41,7 +46,8 @@ export function useBasketRangesQuery(): BasketRangesQueryView {
         : new Error('Неизвестная ошибка запроса корзин CDN')
     return {
       state: BasketRangesQueryState.Fallback,
-      ranges: fallbackBasketRanges,
+      media: fallbackBasketRanges,
+      video: [],
       error: resolvedError,
       retry() {
         void query.refetch()
@@ -49,10 +55,14 @@ export function useBasketRangesQuery(): BasketRangesQueryView {
     }
   }
 
-  const ranges = query.data
-  if (ranges === undefined) {
+  const maps = query.data
+  if (maps === undefined) {
     return { state: BasketRangesQueryState.Loading }
   }
 
-  return { state: BasketRangesQueryState.Ready, ranges }
+  return {
+    state: BasketRangesQueryState.Ready,
+    media: maps.media,
+    video: maps.video,
+  }
 }

@@ -18,6 +18,10 @@ import {
   ProductCardQueryState,
   useProductCardQuery,
 } from '../../entities/product/useProductCardQuery.ts'
+import {
+  VideoPlaylistQueryState,
+  useVideoPlaylistQuery,
+} from '../../entities/product/useVideoPlaylistQuery.ts'
 import { useDownloadPhotosZip } from '../../features/download-media/useDownloadPhotosZip.ts'
 import { PhotoPickerModal, type VisiblePhoto } from './PhotoPickerModal.tsx'
 
@@ -63,30 +67,42 @@ export function ProductMediaPage() {
   const [failed, setFailed] = useState<ReadonlySet<number>>(new Set())
   const [editedSelected, setEditedSelected] =
     useState<ReadonlySet<number> | null>(null)
+  const [videoNoteOpen, setVideoNoteOpen] = useState(false)
 
   const card = useProductCardQuery(submitted)
   const ranges = useBasketRangesQuery()
   const zip = useDownloadPhotosZip()
   const parsedDraft = parseArticle(draft)
 
-  const rangeList =
+  const mediaRanges =
     ranges.state === BasketRangesQueryState.Ready ||
     ranges.state === BasketRangesQueryState.Fallback
-      ? ranges.ranges
+      ? ranges.media
+      : null
+
+  const videoRanges =
+    ranges.state === BasketRangesQueryState.Ready ||
+    ranges.state === BasketRangesQueryState.Fallback
+      ? ranges.video
       : null
 
   const foundProduct =
     card.state === ProductCardQueryState.Found ? card.product : null
 
   const visiblePhotos =
-    foundProduct !== null && rangeList !== null
+    foundProduct !== null && mediaRanges !== null
       ? collectVisiblePhotos(
           foundProduct.id,
           foundProduct.pics,
-          rangeList,
+          mediaRanges,
           failed,
         )
       : []
+
+  const video = useVideoPlaylistQuery(
+    foundProduct === null ? null : foundProduct.id,
+    videoRanges,
+  )
 
   const selected =
     editedSelected ??
@@ -109,6 +125,7 @@ export function ProductMediaPage() {
     setSearchNonce((current) => current + 1)
     setFailed(new Set())
     setEditedSelected(null)
+    setVideoNoteOpen(false)
   }
 
   function handleModalClose() {
@@ -116,6 +133,7 @@ export function ProductMediaPage() {
     setClosedNonce(searchNonce)
     setFailed(new Set())
     setEditedSelected(null)
+    setVideoNoteOpen(false)
   }
 
   function handleDownloadPhotos() {
@@ -215,6 +233,15 @@ export function ProductMediaPage() {
             zipTotal={zip.total}
             mismatches={zip.mismatches}
             onDownloadPhotos={handleDownloadPhotos}
+            videoPlaylistUrl={
+              video.state === VideoPlaylistQueryState.Available
+                ? video.url
+                : null
+            }
+            videoNoteOpen={videoNoteOpen}
+            onVideoClick={() => {
+              setVideoNoteOpen(true)
+            }}
           />
         ) : null}
       </Stack>

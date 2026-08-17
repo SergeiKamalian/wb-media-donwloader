@@ -33,6 +33,9 @@ type PhotoPickerModalProps = {
   zipTotal: number
   mismatches: readonly ImageTypeMismatch[]
   onDownloadPhotos: () => void
+  videoPlaylistUrl: string | null
+  videoNoteOpen: boolean
+  onVideoClick: () => void
 }
 
 export function PhotoPickerModal({
@@ -50,6 +53,9 @@ export function PhotoPickerModal({
   zipTotal,
   mismatches,
   onDownloadPhotos,
+  videoPlaylistUrl,
+  videoNoteOpen,
+  onVideoClick,
 }: PhotoPickerModalProps) {
   const selectedCount = photos.filter((photo) =>
     selected.has(photo.number),
@@ -127,6 +133,13 @@ export function PhotoPickerModal({
             </Text>
           ) : null}
 
+          {videoNoteOpen && videoPlaylistUrl !== null ? (
+            <Text size="sm">
+              Видео отдаётся плейлистом HLS с сегментами, одним файлом не
+              скачивается, подробности в README. {videoPlaylistUrl}
+            </Text>
+          ) : null}
+
           <Group grow preventGrowOverflow wrap="wrap">
             <Button
               disabled={
@@ -136,7 +149,11 @@ export function PhotoPickerModal({
             >
               Скачать фото
             </Button>
-            <Button variant="default">Скачать видео</Button>
+            {videoPlaylistUrl !== null ? (
+              <Button variant="default" onClick={onVideoClick}>
+                Скачать видео
+              </Button>
+            ) : null}
           </Group>
         </Stack>
       )}
