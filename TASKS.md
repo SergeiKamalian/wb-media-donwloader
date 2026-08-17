@@ -66,7 +66,7 @@
 
 Коммит: `feat(api): add dev proxy and http client`
 
-Заметка:
+Заметка: Прокси /wb-card → card.wb.ru и /wb-cdn → cdn.wbbasket.ru. Указанный __internal закрыт WAF (403/498); Origin, Referer и User-Agent по одному и вместе не открывают. Фото — products[0].pics; отдельного ключа видео в этом ответе нет.
 
 ---
 
