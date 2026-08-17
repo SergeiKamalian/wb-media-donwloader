@@ -4,10 +4,13 @@ import {
   Group,
   Loader,
   Modal,
+  Progress,
   SimpleGrid,
   Stack,
   Text,
 } from '@mantine/core'
+import type { ImageTypeMismatch } from '../../features/download-media/detectImageExtension.ts'
+import { PhotosZipState } from '../../features/download-media/useDownloadPhotosZip.ts'
 import { PhotoTile } from './PhotoTile.tsx'
 
 export type VisiblePhoto = {
@@ -25,6 +28,11 @@ type PhotoPickerModalProps = {
   onToggle: (photoNumber: number, checked: boolean) => void
   onToggleAll: (checked: boolean) => void
   onPhotoError: (photoNumber: number) => void
+  zipState: PhotosZipState
+  zipCompleted: number
+  zipTotal: number
+  mismatches: readonly ImageTypeMismatch[]
+  onDownloadPhotos: () => void
 }
 
 export function PhotoPickerModal({
@@ -37,20 +45,21 @@ export function PhotoPickerModal({
   onToggle,
   onToggleAll,
   onPhotoError,
+  zipState,
+  zipCompleted,
+  zipTotal,
+  mismatches,
+  onDownloadPhotos,
 }: PhotoPickerModalProps) {
-  const selectedCount = photos.filter((photo) => selected.has(photo.number)).length
+  const selectedCount = photos.filter((photo) =>
+    selected.has(photo.number),
+  ).length
   const visibleCount = photos.length
   const allSelected = visibleCount > 0 && selectedCount === visibleCount
   const someSelected = selectedCount > 0 && selectedCount < visibleCount
 
   return (
-    <Modal
-      opened={opened}
-      onClose={onClose}
-      title={title}
-      size="xl"
-      centered
-    >
+    <Modal opened={opened} onClose={onClose} title={title} size="xl" centered>
       {isRangesLoading ? (
         <Loader />
       ) : (
@@ -91,8 +100,42 @@ export function PhotoPickerModal({
             </SimpleGrid>
           )}
 
+          {zipState === PhotosZipState.Running ? (
+            <Stack gap="xs">
+              <Progress
+                value={zipTotal === 0 ? 0 : (zipCompleted / zipTotal) * 100}
+              />
+              <Text size="sm">
+                Скачано {zipCompleted} из {zipTotal}
+              </Text>
+            </Stack>
+          ) : null}
+
+          {zipState === PhotosZipState.Empty ? (
+            <Text>Не удалось скачать ни одной фотографии</Text>
+          ) : null}
+
+          {mismatches.length > 0 ? (
+            <Text size="sm">
+              Тип файла взят из сигнатуры, заголовок Content-Type не совпал:{' '}
+              {mismatches
+                .map(
+                  (item) =>
+                    `фото ${item.photoNumber} (${item.contentType} → ${item.signatureExtension})`,
+                )
+                .join('; ')}
+            </Text>
+          ) : null}
+
           <Group grow preventGrowOverflow wrap="wrap">
-            <Button disabled={selectedCount === 0}>Скачать фото</Button>
+            <Button
+              disabled={
+                selectedCount === 0 || zipState === PhotosZipState.Running
+              }
+              onClick={onDownloadPhotos}
+            >
+              Скачать фото
+            </Button>
             <Button variant="default">Скачать видео</Button>
           </Group>
         </Stack>

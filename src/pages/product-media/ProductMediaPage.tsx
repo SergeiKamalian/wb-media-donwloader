@@ -18,6 +18,7 @@ import {
   ProductCardQueryState,
   useProductCardQuery,
 } from '../../entities/product/useProductCardQuery.ts'
+import { useDownloadPhotosZip } from '../../features/download-media/useDownloadPhotosZip.ts'
 import { PhotoPickerModal, type VisiblePhoto } from './PhotoPickerModal.tsx'
 
 function collectVisiblePhotos(
@@ -65,6 +66,7 @@ export function ProductMediaPage() {
 
   const card = useProductCardQuery(submitted)
   const ranges = useBasketRangesQuery()
+  const zip = useDownloadPhotosZip()
   const parsedDraft = parseArticle(draft)
 
   const rangeList =
@@ -88,7 +90,9 @@ export function ProductMediaPage() {
 
   const selected =
     editedSelected ??
-    (foundProduct === null ? new Set<number>() : allPhotoNumbers(foundProduct.pics))
+    (foundProduct === null
+      ? new Set<number>()
+      : allPhotoNumbers(foundProduct.pics))
 
   const modalOpened =
     searchNonce > 0 &&
@@ -108,9 +112,21 @@ export function ProductMediaPage() {
   }
 
   function handleModalClose() {
+    zip.reset()
     setClosedNonce(searchNonce)
     setFailed(new Set())
     setEditedSelected(null)
+  }
+
+  function handleDownloadPhotos() {
+    if (foundProduct === null) {
+      return
+    }
+
+    const selectedPhotos = visiblePhotos.filter((photo) =>
+      selected.has(photo.number),
+    )
+    void zip.start(foundProduct.id, selectedPhotos)
   }
 
   function handleToggle(photoNumber: number, checked: boolean) {
@@ -194,6 +210,11 @@ export function ProductMediaPage() {
             onToggle={handleToggle}
             onToggleAll={handleToggleAll}
             onPhotoError={handlePhotoError}
+            zipState={zip.state}
+            zipCompleted={zip.completed}
+            zipTotal={zip.total}
+            mismatches={zip.mismatches}
+            onDownloadPhotos={handleDownloadPhotos}
           />
         ) : null}
       </Stack>
