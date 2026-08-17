@@ -45,7 +45,7 @@
 
 Коммит: `chore: bootstrap vite react typescript project`
 
-Заметка:
+Заметка: Скелет Vite/React 19/TS strict, провайдеры в app, заглушка страницы; PostCSS-тройка — штатный сетап Mantine для миксинов и брейкпоинтов в T-5. Папки features/entities/shared не создавал.
 
 ---
 
