@@ -222,6 +222,7 @@ export function ProductMediaPage() {
           <PhotoPickerModal
             opened={modalOpened}
             title={foundProduct.name}
+            article={foundProduct.id}
             photos={visiblePhotos}
             selected={selected}
             isRangesLoading={ranges.state === BasketRangesQueryState.Loading}

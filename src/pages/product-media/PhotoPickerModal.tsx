@@ -1,4 +1,5 @@
 import {
+  Box,
   Button,
   Checkbox,
   Group,
@@ -12,6 +13,7 @@ import {
 import type { ImageTypeMismatch } from '../../features/download-media/detectImageExtension.ts'
 import { PhotosZipState } from '../../features/download-media/useDownloadPhotosZip.ts'
 import { PhotoTile } from './PhotoTile.tsx'
+import { VideoTile } from './VideoTile.tsx'
 
 export type VisiblePhoto = {
   number: number
@@ -21,6 +23,7 @@ export type VisiblePhoto = {
 type PhotoPickerModalProps = {
   opened: boolean
   title: string
+  article: number
   photos: readonly VisiblePhoto[]
   selected: ReadonlySet<number>
   isRangesLoading: boolean
@@ -37,9 +40,14 @@ type PhotoPickerModalProps = {
   onVideoClick: () => void
 }
 
+function videoPreviewUrl(playlistUrl: string): string {
+  return new URL('preview.webp', playlistUrl).href
+}
+
 export function PhotoPickerModal({
   opened,
   title,
+  article,
   photos,
   selected,
   isRangesLoading,
@@ -63,75 +71,88 @@ export function PhotoPickerModal({
   const someSelected = selectedCount > 0 && selectedCount < visibleCount
 
   return (
-    <Modal opened={opened} onClose={onClose} title={title} size="xl" centered>
+    <Modal
+      opened={opened}
+      onClose={onClose}
+      title={
+        <Stack gap={0}>
+          <Text fw="bold">{title}</Text>
+          <Text size="sm" c="dimmed">
+            {article}
+          </Text>
+        </Stack>
+      }
+      size="xl"
+      centered
+    >
       {isRangesLoading ? (
         <Loader />
       ) : (
-        <Stack gap="md">
-          <Group justify="space-between" wrap="wrap">
-            <Checkbox
-              label="Выбрать все"
-              checked={allSelected}
-              indeterminate={someSelected}
-              disabled={visibleCount === 0}
-              onChange={(event) => {
-                onToggleAll(event.currentTarget.checked)
-              }}
-            />
-            <Text size="sm">
-              Выбрано {selectedCount} из {visibleCount}
-            </Text>
-          </Group>
-
-          {visibleCount === 0 ? (
-            <Text>Нет доступных фотографий</Text>
-          ) : (
-            <SimpleGrid cols={{ base: 2, sm: 3, md: 4 }} spacing="sm">
-              {photos.map((photo) => (
-                <PhotoTile
-                  key={photo.number}
-                  url={photo.url}
-                  label={`Фото ${photo.number}`}
-                  checked={selected.has(photo.number)}
-                  onCheckedChange={(checked) => {
-                    onToggle(photo.number, checked)
-                  }}
-                  onLoadError={() => {
-                    onPhotoError(photo.number)
-                  }}
-                />
-              ))}
-            </SimpleGrid>
-          )}
-
-          {zipState === PhotosZipState.Running ? (
-            <Stack gap="xs">
-              <Progress
-                value={zipTotal === 0 ? 0 : (zipCompleted / zipTotal) * 100}
+        <Stack gap="lg">
+          <Stack gap="md">
+            <Group gap="sm" wrap="wrap">
+              <Checkbox
+                label="Выбрать все"
+                checked={allSelected}
+                indeterminate={someSelected}
+                disabled={visibleCount === 0}
+                onChange={(event) => {
+                  onToggleAll(event.currentTarget.checked)
+                }}
               />
               <Text size="sm">
-                Скачано {zipCompleted} из {zipTotal}
+                Выбрано {selectedCount} из {visibleCount}
               </Text>
-            </Stack>
-          ) : null}
+            </Group>
 
-          {zipState === PhotosZipState.Empty ? (
-            <Text>Не удалось скачать ни одной фотографии</Text>
-          ) : null}
+            {visibleCount === 0 ? (
+              <Text>Нет доступных фотографий</Text>
+            ) : (
+              <SimpleGrid cols={{ base: 2, sm: 4, md: 5, lg: 6 }} spacing="sm">
+                {photos.map((photo) => (
+                  <PhotoTile
+                    key={photo.number}
+                    url={photo.url}
+                    label={`Фото ${photo.number}`}
+                    checked={selected.has(photo.number)}
+                    onCheckedChange={(checked) => {
+                      onToggle(photo.number, checked)
+                    }}
+                    onLoadError={() => {
+                      onPhotoError(photo.number)
+                    }}
+                  />
+                ))}
+              </SimpleGrid>
+            )}
 
-          {mismatches.length > 0 ? (
-            <Text size="sm">
-              Тип файла взят из сигнатуры, заголовок Content-Type не совпал:{' '}
-              {mismatches
-                .map(
-                  (item) =>
-                    `фото ${item.photoNumber} (${item.contentType} → ${item.signatureExtension})`,
-                )
-                .join('; ')}
-            </Text>
-          ) : null}
+            {zipState === PhotosZipState.Running ? (
+              <Stack gap="xs">
+                <Progress
+                  value={zipTotal === 0 ? 0 : (zipCompleted / zipTotal) * 100}
+                />
+                <Text size="sm">
+                  Скачано {zipCompleted} из {zipTotal}
+                </Text>
+              </Stack>
+            ) : null}
 
-          <Group grow preventGrowOverflow wrap="wrap">
+            {zipState === PhotosZipState.Empty ? (
+              <Text>Не удалось скачать ни одной фотографии</Text>
+            ) : null}
+
+            {mismatches.length > 0 ? (
+              <Text size="sm">
+                Тип файла взят из сигнатуры, заголовок Content-Type не совпал:{' '}
+                {mismatches
+                  .map(
+                    (item) =>
+                      `фото ${item.photoNumber} (${item.contentType} → ${item.signatureExtension})`,
+                  )
+                  .join('; ')}
+              </Text>
+            ) : null}
+
             <Button
               disabled={
                 selectedCount === 0 || zipState === PhotosZipState.Running
@@ -140,12 +161,18 @@ export function PhotoPickerModal({
             >
               Скачать фото
             </Button>
-            {videoPlaylistUrl !== null ? (
-              <Button variant="default" onClick={onVideoClick}>
+          </Stack>
+
+          {videoPlaylistUrl !== null ? (
+            <Group align="center" wrap="wrap" gap="md">
+              <Box w={{ base: '50%', sm: '25%', md: '20%', lg: '16.66%' }}>
+                <VideoTile previewUrl={videoPreviewUrl(videoPlaylistUrl)} />
+              </Box>
+              <Button color="wbAccent" variant="light" onClick={onVideoClick}>
                 Скачать видео
               </Button>
-            ) : null}
-          </Group>
+            </Group>
+          ) : null}
         </Stack>
       )}
     </Modal>
