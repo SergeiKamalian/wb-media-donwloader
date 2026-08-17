@@ -88,7 +88,7 @@
 
 Коммит: `feat(product): add card types and query`
 
-Заметка:
+Заметка: Типы id/name/pics/root/brand, разбор unknown без as. Хук отдаёт idle/loading/found/notFound/error; пустой products это notFound, не ошибка. На 604174866 name и pics 20.
 
 ---
 
