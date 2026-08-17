@@ -8,7 +8,8 @@ import {
   Title,
 } from '@mantine/core'
 import { useState, type FormEvent } from 'react'
-import { buildPhotoUrl } from '../../entities/product/buildPhotoUrl.ts'
+import { videoPreviewUrl } from '../../entities/product/buildVideoPlaylistUrl.ts'
+import { collectVisiblePhotos } from '../../entities/product/collectVisiblePhotos.ts'
 import { parseArticle } from '../../entities/product/parseArticle.ts'
 import {
   BasketRangesQueryState,
@@ -24,34 +25,8 @@ import {
 } from '../../entities/product/useVideoPlaylistQuery.ts'
 import { useDownloadPhotosZip } from '../../features/download-media/useDownloadPhotosZip.ts'
 import { useDownloadVideoMp4 } from '../../features/download-media/useDownloadVideoMp4.ts'
-import { PhotoPickerModal, type VisiblePhoto } from './PhotoPickerModal.tsx'
+import { PhotoPickerModal } from './PhotoPickerModal.tsx'
 import { VideoDownloadModal } from './VideoDownloadModal.tsx'
-
-function collectVisiblePhotos(
-  article: number,
-  pics: number,
-  ranges: Parameters<typeof buildPhotoUrl>[2],
-  failed: ReadonlySet<number>,
-): VisiblePhoto[] {
-  const photos: VisiblePhoto[] = []
-
-  for (let photoNumber = 1; photoNumber <= pics; photoNumber += 1) {
-    if (failed.has(photoNumber)) {
-      continue
-    }
-
-    try {
-      photos.push({
-        number: photoNumber,
-        url: buildPhotoUrl(article, photoNumber, ranges),
-      })
-    } catch {
-      continue
-    }
-  }
-
-  return photos
-}
 
 function allPhotoNumbers(pics: number): Set<number> {
   const numbers = new Set<number>()
@@ -235,9 +210,9 @@ export function ProductMediaPage() {
             zipTotal={zip.total}
             mismatches={zip.mismatches}
             onDownloadPhotos={handleDownloadPhotos}
-            videoPlaylistUrl={
+            videoPreviewUrl={
               video.state === VideoPlaylistQueryState.Available
-                ? video.url
+                ? videoPreviewUrl(video.url)
                 : null
             }
             onVideoClick={() => {

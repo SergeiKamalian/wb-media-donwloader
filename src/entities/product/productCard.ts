@@ -2,7 +2,6 @@ export type ProductCard = {
   id: number
   name: string
   pics: number
-  root: number
 }
 
 export enum ProductCardLookupState {
@@ -62,7 +61,6 @@ export function parseProductCardLookup(payload: unknown): ProductCardLookup {
       id: readFiniteNumber(first, 'id'),
       name: readString(first, 'name'),
       pics: readFiniteNumber(first, 'pics'),
-      root: readFiniteNumber(first, 'root'),
     },
   }
 }

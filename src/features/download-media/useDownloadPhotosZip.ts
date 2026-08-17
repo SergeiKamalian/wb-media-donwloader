@@ -1,10 +1,12 @@
 import { useRef, useState } from 'react'
+import { bytesToArrayBuffer } from '../../shared/lib/bytesToArrayBuffer.ts'
+import { isAbortError } from '../../shared/lib/isAbortError.ts'
+import type { ImageTypeMismatch } from './detectImageExtension.ts'
 import {
   downloadPhotosZip,
   PhotosZipBuildState,
   type PhotoDownloadItem,
 } from './downloadPhotosZip.ts'
-import type { ImageTypeMismatch } from './detectImageExtension.ts'
 
 export enum PhotosZipState {
   Idle = 'idle',
@@ -25,12 +27,6 @@ export type PhotosZipView = {
   reset: () => void
 }
 
-function bytesToArrayBuffer(bytes: Uint8Array): ArrayBuffer {
-  const copy = new ArrayBuffer(bytes.byteLength)
-  new Uint8Array(copy).set(bytes)
-  return copy
-}
-
 function saveZip(article: number, zipBytes: Uint8Array) {
   const blob = new Blob([bytesToArrayBuffer(zipBytes)], {
     type: 'application/zip',
@@ -41,10 +37,6 @@ function saveZip(article: number, zipBytes: Uint8Array) {
   link.download = `${article}-photos.zip`
   link.click()
   URL.revokeObjectURL(objectUrl)
-}
-
-function isAbortError(error: unknown): boolean {
-  return error instanceof DOMException && error.name === 'AbortError'
 }
 
 export function useDownloadPhotosZip(): PhotosZipView {

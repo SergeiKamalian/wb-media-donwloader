@@ -1,4 +1,5 @@
 import { Zip, ZipPassThrough } from 'fflate'
+import { isAbortError } from '../../shared/lib/isAbortError.ts'
 import { mapWithConcurrency } from '../../shared/lib/mapWithConcurrency.ts'
 import {
   detectImageExtension,
@@ -39,10 +40,6 @@ function concatChunks(chunks: readonly Uint8Array[]): Uint8Array {
     offset += chunk.byteLength
   }
   return output
-}
-
-function isAbortError(error: unknown): boolean {
-  return error instanceof DOMException && error.name === 'AbortError'
 }
 
 function paddedPhotoNumber(photoNumber: number): string {

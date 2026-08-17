@@ -15,7 +15,7 @@ import { PhotosZipState } from '../../features/download-media/useDownloadPhotosZ
 import { PhotoTile } from './PhotoTile.tsx'
 import { VideoTile } from './VideoTile.tsx'
 
-export type VisiblePhoto = {
+type VisiblePhoto = {
   number: number
   url: string
 }
@@ -36,12 +36,8 @@ type PhotoPickerModalProps = {
   zipTotal: number
   mismatches: readonly ImageTypeMismatch[]
   onDownloadPhotos: () => void
-  videoPlaylistUrl: string | null
+  videoPreviewUrl: string | null
   onVideoClick: () => void
-}
-
-function videoPreviewUrl(playlistUrl: string): string {
-  return new URL('preview.webp', playlistUrl).href
 }
 
 export function PhotoPickerModal({
@@ -60,7 +56,7 @@ export function PhotoPickerModal({
   zipTotal,
   mismatches,
   onDownloadPhotos,
-  videoPlaylistUrl,
+  videoPreviewUrl,
   onVideoClick,
 }: PhotoPickerModalProps) {
   const selectedCount = photos.filter((photo) =>
@@ -163,10 +159,10 @@ export function PhotoPickerModal({
             </Button>
           </Stack>
 
-          {videoPlaylistUrl !== null ? (
+          {videoPreviewUrl !== null ? (
             <Group align="center" wrap="wrap" gap="md">
               <Box w={{ base: '50%', sm: '25%', md: '20%', lg: '16.66%' }}>
-                <VideoTile previewUrl={videoPreviewUrl(videoPlaylistUrl)} />
+                <VideoTile previewUrl={videoPreviewUrl} />
               </Box>
               <Button color="wbAccent" variant="light" onClick={onVideoClick}>
                 Скачать видео

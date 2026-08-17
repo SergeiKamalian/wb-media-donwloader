@@ -1,6 +1,8 @@
 import { useRef, useState } from 'react'
 import { fetchVideoPlaylistText } from '../../entities/product/fetchVideoMedia.ts'
 import { parsePlaylistSegments } from '../../entities/product/parsePlaylistSegments.ts'
+import { bytesToArrayBuffer } from '../../shared/lib/bytesToArrayBuffer.ts'
+import { isAbortError } from '../../shared/lib/isAbortError.ts'
 import { assembleVideoMp4, downloadVideoSegments } from './downloadVideoMp4.ts'
 
 export enum VideoDownloadState {
@@ -24,12 +26,6 @@ export type VideoDownloadView = {
   close: () => void
 }
 
-function bytesToArrayBuffer(bytes: Uint8Array): ArrayBuffer {
-  const copy = new ArrayBuffer(bytes.byteLength)
-  new Uint8Array(copy).set(bytes)
-  return copy
-}
-
 function saveMp4(article: number, bytes: Uint8Array) {
   const blob = new Blob([bytesToArrayBuffer(bytes)], { type: 'video/mp4' })
   const objectUrl = URL.createObjectURL(blob)
@@ -38,10 +34,6 @@ function saveMp4(article: number, bytes: Uint8Array) {
   link.download = `${article}.mp4`
   link.click()
   URL.revokeObjectURL(objectUrl)
-}
-
-function isAbortError(error: unknown): boolean {
-  return error instanceof DOMException && error.name === 'AbortError'
 }
 
 export function useDownloadVideoMp4(): VideoDownloadView {

@@ -1,10 +1,10 @@
 import { findBasketHost, type BasketRange } from './basketRanges.ts'
 
-export function articleVol(article: number): number {
+function articleVol(article: number): number {
   return Math.floor(article / 100_000)
 }
 
-export function articleSpec(article: number): number {
+function articleSpec(article: number): number {
   return Math.floor(article / 1_000)
 }
 

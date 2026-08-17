@@ -1,8 +1,5 @@
 import { HttpError, NetworkError } from '../../shared/api/http.ts'
-
-function isAbortError(error: unknown): boolean {
-  return error instanceof DOMException && error.name === 'AbortError'
-}
+import { isAbortError } from '../../shared/lib/isAbortError.ts'
 
 async function requestVideo(
   url: string,

@@ -6,7 +6,7 @@ import {
 } from './productCard.ts'
 
 // Для прода регион должен приходить от пользователя, а не быть зашитым.
-export const wbDest = -1257786
+const wbDest = -1257786
 
 export async function fetchProductCard(
   article: number,
