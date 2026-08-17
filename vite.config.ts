@@ -4,6 +4,10 @@ import { defineConfig } from 'vitest/config'
 export default defineConfig({
   plugins: [react()],
   server: {
+    headers: {
+      'Cross-Origin-Embedder-Policy': 'require-corp',
+      'Cross-Origin-Opener-Policy': 'same-origin',
+    },
     proxy: {
       // BRIEF указывает www.wildberries.ru/__internal/card/cards/v4/detail.
       // Этот хост отвечает 403/498 (WAF Angie). Origin, Referer и User-Agent

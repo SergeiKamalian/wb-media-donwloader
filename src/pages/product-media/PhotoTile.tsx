@@ -23,6 +23,7 @@ export function PhotoTile({
           alt={label}
           loading="lazy"
           radius="sm"
+          crossOrigin="anonymous"
           onError={onLoadError}
         />
         <Checkbox

@@ -23,7 +23,9 @@ import {
   useVideoPlaylistQuery,
 } from '../../entities/product/useVideoPlaylistQuery.ts'
 import { useDownloadPhotosZip } from '../../features/download-media/useDownloadPhotosZip.ts'
+import { useDownloadVideoMp4 } from '../../features/download-media/useDownloadVideoMp4.ts'
 import { PhotoPickerModal, type VisiblePhoto } from './PhotoPickerModal.tsx'
+import { VideoDownloadModal } from './VideoDownloadModal.tsx'
 
 function collectVisiblePhotos(
   article: number,
@@ -67,11 +69,10 @@ export function ProductMediaPage() {
   const [failed, setFailed] = useState<ReadonlySet<number>>(new Set())
   const [editedSelected, setEditedSelected] =
     useState<ReadonlySet<number> | null>(null)
-  const [videoNoteOpen, setVideoNoteOpen] = useState(false)
-
   const card = useProductCardQuery(submitted)
   const ranges = useBasketRangesQuery()
   const zip = useDownloadPhotosZip()
+  const videoDownload = useDownloadVideoMp4()
   const parsedDraft = parseArticle(draft)
 
   const mediaRanges =
@@ -125,15 +126,15 @@ export function ProductMediaPage() {
     setSearchNonce((current) => current + 1)
     setFailed(new Set())
     setEditedSelected(null)
-    setVideoNoteOpen(false)
+    videoDownload.close()
   }
 
   function handleModalClose() {
     zip.reset()
+    videoDownload.close()
     setClosedNonce(searchNonce)
     setFailed(new Set())
     setEditedSelected(null)
-    setVideoNoteOpen(false)
   }
 
   function handleDownloadPhotos() {
@@ -238,12 +239,28 @@ export function ProductMediaPage() {
                 ? video.url
                 : null
             }
-            videoNoteOpen={videoNoteOpen}
             onVideoClick={() => {
-              setVideoNoteOpen(true)
+              if (foundProduct === null) {
+                return
+              }
+              if (video.state !== VideoPlaylistQueryState.Available) {
+                return
+              }
+              videoDownload.open(foundProduct.id, video.url)
             }}
           />
         ) : null}
+
+        <VideoDownloadModal
+          state={videoDownload.state}
+          playlistUrl={videoDownload.playlistUrl}
+          segmentCount={videoDownload.segmentCount}
+          completed={videoDownload.completed}
+          error={videoDownload.error}
+          onStart={videoDownload.start}
+          onRetry={videoDownload.retry}
+          onClose={videoDownload.close}
+        />
       </Stack>
     </Container>
   )

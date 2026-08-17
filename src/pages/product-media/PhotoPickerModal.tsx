@@ -34,7 +34,6 @@ type PhotoPickerModalProps = {
   mismatches: readonly ImageTypeMismatch[]
   onDownloadPhotos: () => void
   videoPlaylistUrl: string | null
-  videoNoteOpen: boolean
   onVideoClick: () => void
 }
 
@@ -54,7 +53,6 @@ export function PhotoPickerModal({
   mismatches,
   onDownloadPhotos,
   videoPlaylistUrl,
-  videoNoteOpen,
   onVideoClick,
 }: PhotoPickerModalProps) {
   const selectedCount = photos.filter((photo) =>
@@ -130,13 +128,6 @@ export function PhotoPickerModal({
                     `фото ${item.photoNumber} (${item.contentType} → ${item.signatureExtension})`,
                 )
                 .join('; ')}
-            </Text>
-          ) : null}
-
-          {videoNoteOpen && videoPlaylistUrl !== null ? (
-            <Text size="sm">
-              Видео отдаётся плейлистом HLS с сегментами, одним файлом не
-              скачивается, подробности в README. {videoPlaylistUrl}
             </Text>
           ) : null}
 

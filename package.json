@@ -13,6 +13,8 @@
     "prepare": "husky"
   },
   "dependencies": {
+    "@ffmpeg/ffmpeg": "^0.12.15",
+    "@ffmpeg/util": "^0.12.2",
     "@mantine/core": "9.5.1",
     "@mantine/hooks": "9.5.1",
     "@tanstack/react-query": "5.101.4",
