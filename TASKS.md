@@ -115,7 +115,7 @@
 Коммит: `feat(product): build media urls from live cdn upstreams`
 В теле коммита объяснить, почему диапазоны не зашиты.
 
-Заметка:
+Заметка: Фото: mediabasket из origin, vol=floor(nm/1e5), spec=floor(nm/1e3). Первая фото 604174866 — 200 webp. Видео не делал: формула %144 из gist не подтверждена фактом, перенесено в T-7.
 
 ---
 
